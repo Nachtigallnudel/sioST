@@ -12,7 +12,10 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 //import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
@@ -50,8 +53,17 @@ public class sioST extends JPanel implements WindowListener, ActionListener, Mou
 		private static Image i_on;
 		private Image i_frameoff;
 		private Image i_frameon;
-		private JSlider	JSL_bright;
+		private JSlider	JSL_brightPublic;
+		private JSlider	JSL_brightPrivacy;
+		private JLabel	JLA_brightPublic;
+		private JLabel	JLA_brightPrivacy;
 		//private Image image;
+		
+		private int IPrivacyOn=150;
+		private int IPublicOn=150;
+		private int IPrivacyOff=0;
+		private int IPublicOff=0;
+		
 		
 		
 		
@@ -81,11 +93,20 @@ public class sioST extends JPanel implements WindowListener, ActionListener, Mou
 		JPanel panel = new JPanel();	
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));	
 		
-		JSL_bright= new JSlider(JSlider.HORIZONTAL, 0, 255, 0);
-		JSL_bright.setMajorTickSpacing(50);
-		JSL_bright.setPaintTicks(true);
-		JSL_bright.setPaintLabels(true);
-		JSL_bright.addMouseListener(this);
+		JSL_brightPublic= new JSlider(JSlider.HORIZONTAL, 0, 255, 0);
+		JSL_brightPublic.setMajorTickSpacing(50);
+		JSL_brightPublic.setPaintTicks(true);
+		JSL_brightPublic.setPaintLabels(true);
+		JSL_brightPublic.addMouseListener(this);
+		
+		JSL_brightPrivacy= new JSlider(JSlider.HORIZONTAL, 0, 255, 0);
+		JSL_brightPrivacy.setMajorTickSpacing(50);
+		JSL_brightPrivacy.setPaintTicks(true);
+		JSL_brightPrivacy.setPaintLabels(true);
+		JSL_brightPrivacy.addMouseListener(this);
+		
+		JLA_brightPublic = new JLabel("Public Power");
+		JLA_brightPrivacy = new JLabel("Privacy Power");
 		
 		
 		b_switch= new JButton();	
@@ -93,7 +114,58 @@ public class sioST extends JPanel implements WindowListener, ActionListener, Mou
 		b_switch.addActionListener((ActionListener) this);
 		b_switch.setIcon(i_Switch_on);
 		panel.add(b_switch);
-		panel.add(JSL_bright);
+		
+		panel.add(JLA_brightPrivacy);
+		panel.add(JSL_brightPrivacy);
+		panel.add(JLA_brightPublic);
+		panel.add(JSL_brightPublic);
+		
+		
+		
+		JSL_brightPublic.addChangeListener(new ChangeListener() {
+		      public void stateChanged(ChangeEvent event) {
+		    	  System.out.println("Set Public Power to =  " + 	JSL_brightPublic.getValue());
+		    	  
+		    	  if(state_switch)
+					{
+		    		   //IPublicOff=JSL_brightPublic.getValue();	
+		    		   IPublicOn=JSL_brightPublic.getValue();
+					}
+		    	  else
+		    	  {
+		    		  IPublicOff=JSL_brightPublic.getValue();	
+		    		  //IPublicOn=JSL_brightPublic.getValue();
+		    		    
+		    	  }
+		    	  
+		    	  
+		    	     	  
+		    	  
+		    	  
+		    	  
+		      }
+		    });
+		JSL_brightPrivacy.addChangeListener(new ChangeListener() {
+		      public void stateChanged(ChangeEvent event) {
+		    	  System.out.println("Set Privacy Power to =  " + 	JSL_brightPrivacy.getValue());
+		    	 
+		    	  if(state_switch)
+					{
+		    		  //IPrivacyOff=JSL_brightPrivacy.getValue();
+		    		  IPrivacyOn=JSL_brightPrivacy.getValue();
+					}
+		    	  else
+		    	  {
+		    		  IPrivacyOff=JSL_brightPrivacy.getValue(); 
+		    		  //IPrivacyOn=JSL_brightPrivacy.getValue();
+		    		  
+		    	  }
+		    	  
+		    	  
+		      }
+		    });
+		
+		
 		
 		
 		add(panel,BorderLayout.CENTER);
@@ -156,32 +228,46 @@ public class sioST extends JPanel implements WindowListener, ActionListener, Mou
 	            if(state_switch)
 				{
 					System.out.println("Push Button on" );
+					
+					
 					b_switch.setIcon(i_Switch_off);
 					state_switch=false;
-					
+					SetWerte();
 					System.out.println("LED on");
-					String str ="SetLEDw=255<";
+					String str ="SetLEDw=" + IPrivacyOff +"<";
 					byte[] bytes = str.getBytes();
 					serialPort.writeBytes(bytes, bytes.length);
-					System.out.println("##################### " + str+ " #######################" );				
+					System.out.println("##################### " + str+ " #######################" );		
+					String str2 ="SetLEDr=" + IPublicOff +"<";
+					byte[] bytes2 = str2.getBytes();
+					serialPort.writeBytes(bytes2, bytes2.length);
+					System.out.println("##################### " + str2+ " #######################" );		
 					//serialIN();
 					image = i_off;
 					trayIcon.setImage(image);
+					
+					
 				}
 				else
 				{
 					System.out.println("Push Button off" );
+					
 					b_switch.setIcon(i_Switch_on);
 					state_switch=true;
-					
+					SetWerte();
 					System.out.println("LED off");
-					String str ="SetLEDw=0<";
+					String str ="SetLEDw=" + IPrivacyOn +"<";
 					byte[] bytes = str.getBytes();
 					serialPort.writeBytes(bytes, bytes.length);
-					System.out.println("##################### " + str+ " #######################" );				
+					System.out.println("##################### " + str+ " #######################" );		
+					String str2 ="SetLEDr=" + IPublicOn +"<";
+					byte[] bytes2 = str2.getBytes();
+					serialPort.writeBytes(bytes2, bytes2.length);
+					System.out.println("##################### " + str2+ " #######################" );
 					//serialIN();
 					image = i_on;
 					trayIcon.setImage(image);
+					
 				}
 	            
 	            
@@ -270,7 +356,7 @@ public class sioST extends JPanel implements WindowListener, ActionListener, Mou
 		//ImageIcon img = new ImageIcon("images/sioshield/icon-on.png");
 		frame = new JFrame("sioSHIELD1");
 		frame.setIconImage(i_offline);
-		frame.setSize(585, 340);
+		frame.setSize(650, 450);
 		frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		frame.setLocation(100, 100);
 		sioST newContentPane = new sioST();
@@ -575,32 +661,47 @@ public class sioST extends JPanel implements WindowListener, ActionListener, Mou
 			 if(state_switch)
 				{
 					System.out.println("Push Button on" );
+					
+					
 					b_switch.setIcon(i_Switch_off);
 					state_switch=false;
-					
+					SetWerte();
 					System.out.println("LED on");
-					String str ="SetLEDw=255<";
+					String str ="SetLEDw=" + IPrivacyOff +"<";
 					byte[] bytes = str.getBytes();
 					serialPort.writeBytes(bytes, bytes.length);
-					System.out.println("##################### " + str+ " #######################" );				
-					serialIN();
+					System.out.println("##################### " + str+ " #######################" );
+					String str2 ="SetLEDr=" + IPublicOff +"<";
+					byte[] bytes2 = str2.getBytes();
+					serialPort.writeBytes(bytes2, bytes2.length);
+					System.out.println("##################### " + str2+ " #######################" );
+					//serialIN();
 					image = i_off;
 					trayIcon.setImage(image);
+					
+					
 				}
 				else
 				{
 					System.out.println("Push Button off" );
+					
+					
 					b_switch.setIcon(i_Switch_on);
 					state_switch=true;
-					
+					SetWerte();
 					System.out.println("LED off");
-					String str ="SetLEDw=0<";
+					String str ="SetLEDw=" + IPrivacyOn +"<";
 					byte[] bytes = str.getBytes();
 					serialPort.writeBytes(bytes, bytes.length);
-					System.out.println("##################### " + str+ " #######################" );				
-					serialIN();
+					System.out.println("##################### " + str+ " #######################" );
+					String str2 ="SetLEDr=" + IPublicOn +"<";
+					byte[] bytes2 = str2.getBytes();
+					serialPort.writeBytes(bytes2, bytes2.length);
+					System.out.println("##################### " + str2+ " #######################" );
+					//serialIN();
 					image = i_on;
 					trayIcon.setImage(image);
+					
 				}
 		}
 		
@@ -650,6 +751,28 @@ public class sioST extends JPanel implements WindowListener, ActionListener, Mou
 			// TODO Automatisch generierter Erfassungsblock
 			e.printStackTrace();
 		}
+		
+		
+	}
+	
+	private  void SetWerte()
+	{
+		if(state_switch)
+		{
+			//JSL_brightPrivacy.setValue(IPrivacyOn);
+			//JSL_brightPublic.setValue(IPublicOn);
+			JSL_brightPrivacy.setValue(IPrivacyOff);
+			JSL_brightPublic.setValue(IPublicOff);
+		}
+		else
+		{
+			JSL_brightPrivacy.setValue(IPrivacyOn);
+			JSL_brightPublic.setValue(IPublicOn);
+			//JSL_brightPrivacy.setValue(IPrivacyOff);
+			//JSL_brightPublic.setValue(IPublicOff);
+			
+		}
+		
 		
 		
 	}
