@@ -24,7 +24,7 @@ import com.fazecast.jSerialComm.SerialPort;
 
 
 
-public class sioST extends JPanel implements WindowListener, ActionListener, MouseListener{
+public class sioST extends JPanel implements WindowListener, ActionListener{
 	
 	
 		/**
@@ -43,6 +43,7 @@ public class sioST extends JPanel implements WindowListener, ActionListener, Mou
 		static boolean sioScreen=false;
 		static boolean durchlauf=true;
 		static boolean isSIOavailable=false;
+		static boolean BStateSave=false;
 		
 		private static ImageIcon i_Switch_on ;
 		private static ImageIcon i_Switch_off ;
@@ -97,13 +98,14 @@ public class sioST extends JPanel implements WindowListener, ActionListener, Mou
 		JSL_brightPublic.setMajorTickSpacing(50);
 		JSL_brightPublic.setPaintTicks(true);
 		JSL_brightPublic.setPaintLabels(true);
-		JSL_brightPublic.addMouseListener(this);
+		//JSL_brightPublic.set("start");
+		//JSL_brightPublic.addMouseListener(this);
 		
 		JSL_brightPrivacy= new JSlider(JSlider.HORIZONTAL, 0, 255, 0);
 		JSL_brightPrivacy.setMajorTickSpacing(50);
 		JSL_brightPrivacy.setPaintTicks(true);
 		JSL_brightPrivacy.setPaintLabels(true);
-		JSL_brightPrivacy.addMouseListener(this);
+		//JSL_brightPrivacy.addMouseListener(this);
 		
 		JLA_brightPublic = new JLabel("Public Power");
 		JLA_brightPrivacy = new JLabel("Privacy Power");
@@ -122,11 +124,20 @@ public class sioST extends JPanel implements WindowListener, ActionListener, Mou
 		
 		
 		
-		JSL_brightPublic.addChangeListener(new ChangeListener() {
-		      public void stateChanged(ChangeEvent event) {
-		    	  System.out.println("Set Public Power to =  " + 	JSL_brightPublic.getValue());
-		    	  
-		    	  if(state_switch)
+	// mouse Event Public Slider++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++	
+		JSL_brightPublic.addMouseListener(new MouseAdapter() {
+		    @Override
+		    public void mousePressed(MouseEvent e) {
+		    	System.out.println("##################### Mouse Pressed  #######################" );
+		    	
+		    	
+		    	
+		    }
+		    public void mouseReleased(MouseEvent e) {
+	            //System.out.println("Tray Icon - Mouse released!");      
+		    	BStateSave=true;
+	        	System.out.println("##################### Mouse released  #######################" );
+	        	 if(state_switch)
 					{
 		    		   //IPublicOff=JSL_brightPublic.getValue();	
 		    		   IPublicOn=JSL_brightPublic.getValue();
@@ -136,7 +147,46 @@ public class sioST extends JPanel implements WindowListener, ActionListener, Mou
 		    		  IPublicOff=JSL_brightPublic.getValue();	
 		    		  //IPublicOn=JSL_brightPublic.getValue();
 		    		    
-		    	  }
+		    	  }	        	
+	        	
+	        }
+		  });
+		
+		// mouse Event Private Slider ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++	
+		JSL_brightPrivacy.addMouseListener(new MouseAdapter() {
+				    @Override
+				    public void mousePressed(MouseEvent e) {
+				    	System.out.println("##################### Mouse Pressed  #######################" );
+				    	
+				    	
+				    	
+				    }
+				    public void mouseReleased(MouseEvent e) {
+			            //System.out.println("Tray Icon - Mouse released!");      
+				    	BStateSave=true;
+			        	System.out.println("##################### Mouse released  #######################" );
+			        	  if(state_switch)
+							{
+				    		  //IPrivacyOff=JSL_brightPrivacy.getValue();
+				    		  IPrivacyOn=JSL_brightPrivacy.getValue();
+							}
+				    	  else
+				    	  {
+				    		  IPrivacyOff=JSL_brightPrivacy.getValue(); 
+				    		  //IPrivacyOn=JSL_brightPrivacy.getValue();
+				    		  
+				    	  }	
+			        	
+			        }
+				  });
+		
+		
+		
+		JSL_brightPublic.addChangeListener(new ChangeListener() {
+		      public void stateChanged(ChangeEvent event) {
+		    	  //System.out.println("Set Public Power to =  " + 	JSL_brightPublic.getValue());
+		    	  
+		    	 
 		    	  
 		    	  
 		    	     	  
@@ -147,23 +197,18 @@ public class sioST extends JPanel implements WindowListener, ActionListener, Mou
 		    });
 		JSL_brightPrivacy.addChangeListener(new ChangeListener() {
 		      public void stateChanged(ChangeEvent event) {
-		    	  System.out.println("Set Privacy Power to =  " + 	JSL_brightPrivacy.getValue());
+		    	  //System.out.println("Set Privacy Power to =  " + 	JSL_brightPrivacy.getValue());
 		    	 
-		    	  if(state_switch)
-					{
-		    		  //IPrivacyOff=JSL_brightPrivacy.getValue();
-		    		  IPrivacyOn=JSL_brightPrivacy.getValue();
-					}
-		    	  else
-		    	  {
-		    		  IPrivacyOff=JSL_brightPrivacy.getValue(); 
-		    		  //IPrivacyOn=JSL_brightPrivacy.getValue();
-		    		  
-		    	  }
-		    	  
+		    	
 		    	  
 		      }
 		    });
+		
+		
+		
+		
+		
+		
 		
 		
 		
@@ -225,6 +270,12 @@ public class sioST extends JPanel implements WindowListener, ActionListener, Mou
 
 	        public void mouseClicked(MouseEvent e) {
 	            System.out.println("Tray Icon - Mouse clicked!");  
+	            if(BStateSave)
+	    		{
+	    			schreibenINI();
+	    			BStateSave=false;
+	    			
+	    		}
 	            if(state_switch)
 				{
 					System.out.println("Push Button on" );
@@ -275,19 +326,24 @@ public class sioST extends JPanel implements WindowListener, ActionListener, Mou
 	        }
 
 	        public void mouseEntered(MouseEvent e) {
-	            //System.out.println("Tray Icon - Mouse entered!");                 
+	            //System.out.println("Tray Icon - Mouse entered!");         
+	        	System.out.println("##################### Mouse Entered  #######################" );
 	        }
 
 	        public void mouseExited(MouseEvent e) {
-	            //System.out.println("Tray Icon - Mouse exited!");                 
+	            //System.out.println("Tray Icon - Mouse exited!");       
+	        	System.out.println("##################### Mouse Entered  #######################" );
 	        }
 
 	        public void mousePressed(MouseEvent e) {
-	            //System.out.println("Tray Icon - Mouse pressed!");                 
+	            //System.out.println("Tray Icon - Mouse pressed!");       
+	        	System.out.println("##################### Mouse Entered  #######################" );
 	        }
 
 	        public void mouseReleased(MouseEvent e) {
-	            //System.out.println("Tray Icon - Mouse released!");                 
+	            //System.out.println("Tray Icon - Mouse released!");      
+	        	
+	        	System.out.println("##################### Mouse losgelassen  #######################" );
 	        }
 	    };
 	    
@@ -327,9 +383,9 @@ public class sioST extends JPanel implements WindowListener, ActionListener, Mou
 		 
 		}, 20);
 		
-		
+		lesenINI();
 			
-		}
+}
 		
 		
 		
@@ -533,6 +589,8 @@ public class sioST extends JPanel implements WindowListener, ActionListener, Mou
 		}
 		
 	}
+	
+	/*
 	private static boolean serialIN()
 	{
 		//byte[] bytes = str.getBytes();
@@ -593,7 +651,7 @@ public class sioST extends JPanel implements WindowListener, ActionListener, Mou
 		return true;
 	}
 	
-	
+	*/
 
 
 	@Override
@@ -656,13 +714,20 @@ public class sioST extends JPanel implements WindowListener, ActionListener, Mou
 	public void actionPerformed(ActionEvent e) {
 		// TODO Automatisch generierter Methodenstub
 		
+		if(BStateSave)
+		{
+			schreibenINI();
+			BStateSave=false;
+			
+		}
+		
 		if (e.getSource() == b_switch) {
 			//System.out.println("Push Button" );
 			 if(state_switch)
 				{
 					System.out.println("Push Button on" );
 					
-					
+					//BStateSave=false;
 					b_switch.setIcon(i_Switch_off);
 					state_switch=false;
 					SetWerte();
@@ -759,75 +824,35 @@ public class sioST extends JPanel implements WindowListener, ActionListener, Mou
 	{
 		if(state_switch)
 		{
-			//JSL_brightPrivacy.setValue(IPrivacyOn);
-			//JSL_brightPublic.setValue(IPublicOn);
-			JSL_brightPrivacy.setValue(IPrivacyOff);
-			JSL_brightPublic.setValue(IPublicOff);
+			JSL_brightPrivacy.setValue(IPrivacyOn);
+			JSL_brightPublic.setValue(IPublicOn);
 		}
 		else
 		{
-			JSL_brightPrivacy.setValue(IPrivacyOn);
-			JSL_brightPublic.setValue(IPublicOn);
-			//JSL_brightPrivacy.setValue(IPrivacyOff);
-			//JSL_brightPublic.setValue(IPublicOff);
+			
+			JSL_brightPrivacy.setValue(IPrivacyOff);
+			JSL_brightPublic.setValue(IPublicOff);
 			
 		}
 		
+		System.out.println("IPrivacyOff =" + IPrivacyOff + "+++" +"IPublicOff =" + IPublicOff);
+		System.out.println("IPrivacyOn =" + IPrivacyOn + "+++" +"IPublicOn =" + IPublicOn);
 		
 		
 	}
-
-
-
-
-
-	@Override
-	public void mouseClicked(MouseEvent arg0) {
-		// TODO Automatisch generierter Methodenstub
-		
+	public void schreibenINI()
+	{
+		System.out.println("##################### Schreiben Ini #######################" );
 	}
-
-
-
-
-
-	@Override
-	public void mouseEntered(MouseEvent arg0) {
-		// TODO Automatisch generierter Methodenstub
-		
-	}
-
-
-
-
-
-	@Override
-	public void mouseExited(MouseEvent arg0) {
-		// TODO Automatisch generierter Methodenstub
-		
-	}
-
-
-
-
-
-	@Override
-	public void mousePressed(MouseEvent arg0) {
-		// TODO Automatisch generierter Methodenstub
-		
-	}
-
-
-
-
-
-	@Override
-	public void mouseReleased(MouseEvent arg0) {
-		// TODO Automatisch generierter Methodenstub
-		
-	}
-		
-			
 	
+	public void lesenINI()
+	{
+		System.out.println("##################### Lesen Ini #######################" );
+	}
+
+
+
+
+
 
 	}//end of class
