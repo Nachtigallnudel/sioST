@@ -1,6 +1,11 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -10,9 +15,10 @@ import javax.imageio.stream.ImageInputStream;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
+//import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -31,7 +37,8 @@ public class sioST extends JPanel implements WindowListener, ActionListener{
 	 *  
 	 */
 	private static final long serialVersionUID = 1L;
-		private static Boolean state_switch=true;
+		private static Boolean state_switch=false;
+		public String SHome=System.getProperty("user.home");
 		private static Image image;
 		private static TrayIcon trayIcon;
 		private static JFrame frame ;
@@ -44,6 +51,8 @@ public class sioST extends JPanel implements WindowListener, ActionListener{
 		static boolean durchlauf=true;
 		static boolean isSIOavailable=false;
 		static boolean BStateSave=false;
+		static boolean BReverseMode=false;
+		
 		
 		private static ImageIcon i_Switch_on ;
 		private static ImageIcon i_Switch_off ;
@@ -64,6 +73,8 @@ public class sioST extends JPanel implements WindowListener, ActionListener{
 		private int IPublicOn=150;
 		private int IPrivacyOff=0;
 		private int IPublicOff=0;
+		
+		private CheckboxMenuItem CheckBoxReverse;
 		
 		
 		
@@ -128,10 +139,6 @@ public class sioST extends JPanel implements WindowListener, ActionListener{
 		JSL_brightPublic.addMouseListener(new MouseAdapter() {
 		    @Override
 		    public void mousePressed(MouseEvent e) {
-		    	System.out.println("##################### Mouse Pressed  #######################" );
-		    	
-		    	
-		    	
 		    }
 		    public void mouseReleased(MouseEvent e) {
 	            //System.out.println("Tray Icon - Mouse released!");      
@@ -141,11 +148,13 @@ public class sioST extends JPanel implements WindowListener, ActionListener{
 					{
 		    		   //IPublicOff=JSL_brightPublic.getValue();	
 		    		   IPublicOn=JSL_brightPublic.getValue();
+		    		   setLED();
 					}
 		    	  else
 		    	  {
 		    		  IPublicOff=JSL_brightPublic.getValue();	
 		    		  //IPublicOn=JSL_brightPublic.getValue();
+		    		  setLED();
 		    		    
 		    	  }	        	
 	        	
@@ -156,9 +165,6 @@ public class sioST extends JPanel implements WindowListener, ActionListener{
 		JSL_brightPrivacy.addMouseListener(new MouseAdapter() {
 				    @Override
 				    public void mousePressed(MouseEvent e) {
-				    	System.out.println("##################### Mouse Pressed  #######################" );
-				    	
-				    	
 				    	
 				    }
 				    public void mouseReleased(MouseEvent e) {
@@ -169,11 +175,13 @@ public class sioST extends JPanel implements WindowListener, ActionListener{
 							{
 				    		  //IPrivacyOff=JSL_brightPrivacy.getValue();
 				    		  IPrivacyOn=JSL_brightPrivacy.getValue();
+				    		  setLED();
 							}
 				    	  else
 				    	  {
 				    		  IPrivacyOff=JSL_brightPrivacy.getValue(); 
 				    		  //IPrivacyOn=JSL_brightPrivacy.getValue();
+				    		  setLED();
 				    		  
 				    	  }	
 			        	
@@ -236,6 +244,7 @@ public class sioST extends JPanel implements WindowListener, ActionListener{
 
 	    //popupmenu
 	    PopupMenu trayPopupMenu = new PopupMenu();
+	    CheckBoxReverse = new CheckboxMenuItem("Reverse Mode");
 
 	    //1t menuitem for popupmenu
 	    MenuItem action = new MenuItem("Open sioSHIELD");
@@ -252,6 +261,23 @@ public class sioST extends JPanel implements WindowListener, ActionListener{
 	        
 	    
 	    trayPopupMenu.addSeparator();
+	 // Add listener to autoSizeCheckBox.
+	    CheckBoxReverse.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent e) {
+                int autoSizeCheckBoxId = e.getStateChange();
+                if (autoSizeCheckBoxId == ItemEvent.SELECTED) {
+                	BReverseMode=true;
+                	System.out.println("Reverse Mode = true" );
+                	schreibenINI();
+                } else {
+                	BReverseMode=false;
+                	System.out.println("Reverse Mode = false" );
+                	schreibenINI();
+                }
+            }
+        });
+	    trayPopupMenu.add(CheckBoxReverse);
+	   
 	    
 	    
 
@@ -280,44 +306,14 @@ public class sioST extends JPanel implements WindowListener, ActionListener{
 				{
 					System.out.println("Push Button on" );
 					
-					
-					b_switch.setIcon(i_Switch_off);
 					state_switch=false;
-					SetWerte();
-					System.out.println("LED on");
-					String str ="SetLEDprivacy=" + IPrivacyOff +"<";
-					byte[] bytes = str.getBytes();
-					serialPort.writeBytes(bytes, bytes.length);
-					System.out.println("##################### " + str+ " #######################" );		
-					String str2 ="SetLEDpublic=" + IPublicOff +"<";
-					byte[] bytes2 = str2.getBytes();
-					serialPort.writeBytes(bytes2, bytes2.length);
-					System.out.println("##################### " + str2+ " #######################" );		
-					//serialIN();
-					image = i_off;
-					trayIcon.setImage(image);
-					
-					
+					setLED();
 				}
 				else
 				{
 					System.out.println("Push Button off" );
-					
-					b_switch.setIcon(i_Switch_on);
 					state_switch=true;
-					SetWerte();
-					System.out.println("LED off");
-					String str ="SetLEDprivacy=" + IPrivacyOn +"<";
-					byte[] bytes = str.getBytes();
-					serialPort.writeBytes(bytes, bytes.length);
-					System.out.println("##################### " + str+ " #######################" );		
-					String str2 ="SetLEDpublic=" + IPublicOn +"<";
-					byte[] bytes2 = str2.getBytes();
-					serialPort.writeBytes(bytes2, bytes2.length);
-					System.out.println("##################### " + str2+ " #######################" );
-					//serialIN();
-					image = i_on;
-					trayIcon.setImage(image);
+					setLED();
 					
 				}
 	            
@@ -726,46 +722,18 @@ public class sioST extends JPanel implements WindowListener, ActionListener{
 			 if(state_switch)
 				{
 					System.out.println("Push Button on" );
-					
-					//BStateSave=false;
-					b_switch.setIcon(i_Switch_off);
-					state_switch=false;
-					SetWerte();
-					System.out.println("LED on");
-					String str ="SetLEDprivacy=" + IPrivacyOff +"<";
-					byte[] bytes = str.getBytes();
-					serialPort.writeBytes(bytes, bytes.length);
-					System.out.println("##################### " + str+ " #######################" );
-					String str2 ="SetLEDpublic=" + IPublicOff +"<";
-					byte[] bytes2 = str2.getBytes();
-					serialPort.writeBytes(bytes2, bytes2.length);
-					System.out.println("##################### " + str2+ " #######################" );
-					//serialIN();
-					image = i_off;
-					trayIcon.setImage(image);
-					
+					state_switch=false;		
+					setLED();	
+							
 					
 				}
 				else
 				{
-					System.out.println("Push Button off" );
-					
-					
-					b_switch.setIcon(i_Switch_on);
+					System.out.println("Push Button off" );					
 					state_switch=true;
-					SetWerte();
-					System.out.println("LED off");
-					String str ="SetLEDprivacy=" + IPrivacyOn +"<";
-					byte[] bytes = str.getBytes();
-					serialPort.writeBytes(bytes, bytes.length);
-					System.out.println("##################### " + str+ " #######################" );
-					String str2 ="SetLEDpublic=" + IPublicOn +"<";
-					byte[] bytes2 = str2.getBytes();
-					serialPort.writeBytes(bytes2, bytes2.length);
-					System.out.println("##################### " + str2+ " #######################" );
-					//serialIN();
-					image = i_on;
-					trayIcon.setImage(image);
+					setLED();
+					
+					
 					
 				}
 		}
@@ -840,15 +808,201 @@ public class sioST extends JPanel implements WindowListener, ActionListener{
 		
 		
 	}
+	
+	public void setLED()
+	{
+		System.out.println("##################### Set LED #######################" );
+		if(state_switch)
+		{
+			SetWerte();
+			System.out.println("LED off");
+			String str;
+			if(BReverseMode)
+			{
+				str ="SetLEDprivacy=" + (255-IPrivacyOn) +"<";
+			}
+			else
+			{
+				str ="SetLEDprivacy=" + IPrivacyOn +"<";
+			}
+			
+			
+			byte[] bytes = str.getBytes();
+			serialPort.writeBytes(bytes, bytes.length);
+			System.out.println("##################### " + str+ " #######################" );
+			String str2;
+			if(BReverseMode)
+			{
+				str2 ="SetLEDpublic=" + (255-IPublicOn) +"<";
+			}
+			else
+			{
+				str2 ="SetLEDpublic=" + IPublicOn +"<";
+			}
+			
+			
+			byte[] bytes2 = str2.getBytes();
+			serialPort.writeBytes(bytes2, bytes2.length);
+			System.out.println("##################### " + str2+ " #######################" );
+			//serialIN();
+			image = i_off;
+			trayIcon.setImage(image);
+			b_switch.setIcon(i_Switch_off);
+			
+			
+			
+			
+		}
+		else
+		{
+			
+			
+			
+			SetWerte();
+			System.out.println("LED on");
+			String str;
+			if(BReverseMode)
+			{
+				str ="SetLEDprivacy=" + (255-IPrivacyOff) +"<";
+			}
+			else
+			{
+				str ="SetLEDprivacy=" + IPrivacyOff +"<";
+			}
+			
+			byte[] bytes = str.getBytes();
+			serialPort.writeBytes(bytes, bytes.length);
+			System.out.println("##################### " + str+ " #######################" );
+			String str2;
+			if(BReverseMode)
+			{
+				str2 ="SetLEDpublic=" + (255-IPublicOff) +"<";
+			}
+			else
+			{
+				str2 ="SetLEDpublic=" + IPublicOff +"<";
+			}
+			
+			byte[] bytes2 = str2.getBytes();
+			serialPort.writeBytes(bytes2, bytes2.length);
+			System.out.println("##################### " + str2+ " #######################" );
+			image = i_on;
+			trayIcon.setImage(image);
+			b_switch.setIcon(i_Switch_on);
+			
+			
+		}
+		
+
+		
+		
+		
+		
+		
+	}
 	public void schreibenINI()
 	{
 		System.out.println("##################### Schreiben Ini #######################" );
+		PrintWriter pWriter = null;
+	    String s = SHome + "\\videos\\siOSINI.txt";
+	    try {
+	        pWriter = new PrintWriter(new FileWriter(s));
+	        pWriter.println("siOPTICA GMBH siOSHIELD INI");
+	        pWriter.println("IPrivacyOn=" +IPrivacyOn);
+	        pWriter.println("IPublicOn=" +IPublicOn);
+	        pWriter.println("IPrivacyOff=" +IPrivacyOff);
+	        pWriter.println("IPublicOff=" +IPublicOff);
+	        pWriter.println("BReverseMode=" +BReverseMode);
+	        
+	    } catch (IOException ioe) {
+	        ioe.printStackTrace();
+	    } finally {
+	        if (pWriter != null) {
+	            pWriter.flush();
+	            pWriter.close();
+	        }
+	    }
 	}
 	
 	public void lesenINI()
 	{
 		System.out.println("##################### Lesen Ini #######################" );
+		ladeDatei(SHome + "\\videos\\siOSINI.txt");
 	}
+	
+	
+
+	private void ladeDatei(String datName) {
+
+	    File file = new File(datName);
+	    String[] parts2 = null;
+	    String[] parts3 = null;
+	    String[] parts4 = null;
+	    String[] parts5 = null;
+	    String[] parts6 = null;
+	   
+
+	    if (!file.canRead() || !file.isFile())
+	    {
+	    	System.out.println("keine Ini" ); 
+	    	JOptionPane.showMessageDialog(null, "First time to start write ini File", "InfoBox: " , JOptionPane.INFORMATION_MESSAGE);
+	    	schreibenINI();
+	    	System.exit(0);
+	    }
+	       
+
+	        BufferedReader in = null;
+	    try {
+	        in = new BufferedReader(new FileReader(datName));
+	        String zeile = null;
+	        
+	        Integer Z=1;
+	        while ((zeile = in.readLine()) != null) {
+	            System.out.println("Zeile NR = "+ Z + " Gelesene Zeile: " + zeile );
+	            if(Z==2) parts2 = zeile.split("=");
+	            if(Z==3) parts3 = zeile.split("=");
+	            if(Z==4) parts4 = zeile.split("=");
+	            if(Z==5) parts5 = zeile.split("=");
+	            if(Z==6) parts6 = zeile.split("=");
+	           
+	            
+	            Z=Z+1;
+	        }
+	    } catch (IOException e) {
+	    	        e.printStackTrace();
+	    } finally {
+	        if (in != null)
+	            try {
+	                in.close();
+	            } catch (IOException e) {
+	            	
+	            }
+	    }
+	   
+	   
+	    
+	    
+        IPrivacyOn= Integer.parseInt(parts2[1]);
+        IPublicOn= Integer.parseInt(parts3[1]);
+        IPrivacyOff= Integer.parseInt(parts4[1]);
+        IPublicOff= Integer.parseInt(parts5[1]);
+        BReverseMode=Boolean.valueOf(parts6[1]);
+        
+        
+        CheckBoxReverse.setState(BReverseMode);
+        SetWerte();
+        //setLED();
+	    
+	    
+	    
+	   
+	    
+	    //System.out.println("Zeile NR = "+ Z + " Gelesene Zeile: " + zeile );
+	    
+	    
+	}
+
+	
 
 
 
