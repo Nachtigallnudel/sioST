@@ -45,7 +45,7 @@ public class sioST extends JPanel implements WindowListener, ActionListener{
 		
 		private static SerialPort serialPort; 
 		private static int Port=500;
-		static int ZählerPort = 0;
+		static int ZaehlerPort = 0;
 		
 		static boolean sioScreen=false;
 		static boolean durchlauf=true;
@@ -423,7 +423,7 @@ public class sioST extends JPanel implements WindowListener, ActionListener{
 
 	SerialPort[] ports = SerialPort.getCommPorts();
 	System.out.println("Ports :");
-	ZählerPort= 0;
+	ZaehlerPort= 0;
 	Timer timer = new Timer(); 
 	int i=1;
 	for(SerialPort port : ports)
@@ -437,9 +437,9 @@ public class sioST extends JPanel implements WindowListener, ActionListener{
 	{
 		//System.out.println(ZählerPort +  ": " + port.getSystemPortName());
 		//System.out.println("Ports = " + ports.length);
-		serialPort = ports[ZählerPort]; 			
+		serialPort = ports[ZaehlerPort]; 			
 		serialPort.openPort();
-		ports[ZählerPort].isOpen();
+		ports[ZaehlerPort].isOpen();
 		//serialPort.
 		//System.out.println(ZählerPort+" - Port ist offen = " +ports[ZählerPort].isOpen());
 		timer= new Timer();
@@ -453,7 +453,7 @@ public class sioST extends JPanel implements WindowListener, ActionListener{
 				System.out.println("Port opened successfully.");
 				
 				durchlauf =false;
-				Port=ZählerPort;
+				Port=ZaehlerPort;
 				isSIOavailable=true;
 				serialPort.closePort();
 				
@@ -485,7 +485,7 @@ public class sioST extends JPanel implements WindowListener, ActionListener{
 	
 	//System.out.println("Ports sind offen");
 	
-		ZählerPort++;
+		ZaehlerPort++;
 	}
 	if(isSIOavailable)
 	{
